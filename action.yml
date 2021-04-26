@@ -1,14 +1,14 @@
-name: 'Package and publish'
-description: 'Create the package of the project then publish it to Nexus'
+name: 'Get next package version'
+description: 'Retrieve the last package version from a Nexus directory and increment it to use it in the next package build'
 inputs:
   NexusURL: 
     description:  'The URL of the Nexus'
     required: true
   Repository: 
-    description:  'The Nexus repository where the package will be uploaded'
+    description:  'The Nexus repository where the packages to browse are located'
     required: true
   RepositoryDirectory: 
-    description:  'The Nexus directory where the package will be uploaded'
+    description:  'The Nexus directory where the packages to browse are located'
     required: true
   CommitHash: 
     description:  'The hash of the last commit on the branch. It will be added to the version if provided.'
