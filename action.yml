@@ -22,6 +22,7 @@ runs:
   using: "composite"
   steps:
     - id: getnextversion
+      name: Get Next Version
       run: |
           [securestring]$secStringPassword = ConvertTo-SecureString "$env:NEXUS_PASSWORD" -AsPlainText -Force
           [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ("$env:NEXUS_USER", $secStringPassword)
