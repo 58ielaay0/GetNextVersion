@@ -1,0 +1,32 @@
+name: 'Package and publish'
+description: 'Create the package of the project then publish it to Nexus'
+inputs:
+  NexusURL: 
+    description:  'The URL of the Nexus'
+    required: true
+  Repository: 
+    description:  'The Nexus repository where the package will be uploaded'
+    required: true
+  RepositoryDirectory: 
+    description:  'The Nexus directory where the package will be uploaded'
+    required: true
+  CommitHash: 
+    description:  'The hash of the last commit on the branch. It will be added to the version if provided.'
+    required: false
+    default: '$null'
+outputs:
+  nextversion:
+    description: "The next version to use"
+    value: "${{ steps.getnextversion.outputs.nextversion }}"
+runs:
+  using: "composite"
+  steps:
+    - id: getnextversion
+      run: |
+          [securestring]$secStringPassword = ConvertTo-SecureString "$env:NEXUS_PASSWORD" -AsPlainText -Force
+          [pscredential]$credObject = New-Object System.Management.Automation.PSCredential ("$env:NEXUS_USER", $secStringPassword)
+
+          $Version = ${{ github.action_path }}/GetNextVersion.ps1 -Credential $credObject -NexusURL ${{ inputs.NexusURL }} -Repository ${{ inputs.Repository }} -RepositoryDirectory ${{ inputs.RepositoryDirectory }} -CommitHash ${{ inputs.CommitHash }}
+
+          Write-Output "::set-output name=nextversion::$Version"
+      shell: pwsh
