@@ -104,7 +104,7 @@ function Get-LastPackage
     #$groupComponents = $Components | Where-Object {($_.group -like "/$Group")} 
     #$lastPackage = $groupComponents | Sort-Object {$_.assets.blobCreated} -Descending | Select-Object -First 1
     
-    $lastPackage = $Components | Sort-Object {$_.assets.blobCreated} -Descending | Select-Object -First 1
+    $lastPackage = $Components | Sort-Object {$_.assets.lastModified} -Descending | Select-Object -First 1
 
     if(!$lastPackage)
     {
