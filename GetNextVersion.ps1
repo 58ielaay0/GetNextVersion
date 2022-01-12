@@ -55,9 +55,9 @@ function Get-RepoGroupComponents
 	[Parameter(mandatory=$true)]
 	[PSCredential] $Credential,
         [Parameter(mandatory=$true)]
-	[string] $NexusURL
+	[string] $NexusURL,
 	[Parameter(mandatory=$true)]
-	[string] $Repository
+	[string] $Repository,
 	[Parameter(mandatory=$true)]
 	[string] $Group
     )
