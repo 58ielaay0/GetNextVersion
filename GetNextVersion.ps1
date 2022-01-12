@@ -164,14 +164,20 @@ function Read-Filename
 ####################
 
 $components = Get-RepoGroupComponents -Credential $Credential -NexusURL $NexusURL -Repository $Repository -Group $RepositoryDirectory
-$packageName = Get-LastPackage -Components $components -Group $RepositoryDirectory
 
-if(!$packageName) 
+if(!$components) 
 {
     $Version= '0.0.0'
 } else {
-    $packageVersion = Get-PackageVersion -PackageName $packageName 
-    $Version = IncrementVersion -PackageVersion $packageVersion   
+    $packageName = Get-LastPackage -Components $components -Group $RepositoryDirectory
+    
+    if(!$packageName) 
+    {
+        $Version= '0.0.0'
+    } else {
+        $packageVersion = Get-PackageVersion -PackageName $packageName 
+        $Version = IncrementVersion -PackageVersion $packageVersion   
+    }
 }
 
 if($CommitHash)
