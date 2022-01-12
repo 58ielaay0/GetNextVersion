@@ -16,10 +16,10 @@ function Get-RepoComponents
 {
     param
     (
-		[Parameter(mandatory=$true)]
-		[PSCredential] $Credential,
+	[Parameter(mandatory=$true)]
+	[PSCredential] $Credential,
         [Parameter(mandatory=$true)]
-		[string] $RepositoryUrl
+	[string] $RepositoryUrl
     )
 
     try
@@ -47,6 +47,48 @@ function Get-RepoComponents
 
     return $components
 }
+
+function Get-RepoGroupComponents
+{
+    param
+    (
+	[Parameter(mandatory=$true)]
+	[PSCredential] $Credential,
+        [Parameter(mandatory=$true)]
+	[string] $NexusURL
+	[Parameter(mandatory=$true)]
+	[string] $Repository
+	[Parameter(mandatory=$true)]
+	[string] $Group
+    )
+
+    try
+    {
+    	$RepositoryURL = $NexusURL + '/service/rest/v1/search?repository=' + $Repository + '&group=/' + $Group
+        $results = Invoke-RestMethod -Uri $RepositoryUrl -Authentication Basic -Credential $Credential
+        $components = $results.items
+
+        while (([string]::IsNullOrEmpty($results.continuationToken)) -eq $false) {
+
+            $newURL = $RepositoryUrl+"&continuationToken="+$results.continuationToken
+
+            $results = Invoke-RestMethod -Uri $newURL -Authentication Basic -Credential $Credential
+
+            $components = $components + $results.items
+        }
+    }
+    catch
+    {
+        $ErrorMessage = $_.Exception.Message
+        Write-Error "Could not retrieve components from repository!"
+        Write-Error "$ErrorMessage"
+
+        return $null;
+    }
+
+    return $components
+}
+
 function Get-LastPackage
 {
     param
@@ -59,8 +101,10 @@ function Get-LastPackage
 
     Write-Host "Filter to get the last $Group package"
 
-    $groupComponents = $Components | Where-Object {($_.group -like "/$Group")} 
-    $lastPackage = $groupComponents | Sort-Object {$_.assets.blobCreated} -Descending | Select-Object -First 1
+    #$groupComponents = $Components | Where-Object {($_.group -like "/$Group")} 
+    #$lastPackage = $groupComponents | Sort-Object {$_.assets.blobCreated} -Descending | Select-Object -First 1
+    
+    $lastPackage = $Components | Sort-Object {$_.assets.blobCreated} -Descending | Select-Object -First 1
 
     if(!$lastPackage)
     {
@@ -119,10 +163,7 @@ function Read-Filename
 ### Script Start ###
 ####################
 
-
-$RepositoryURL = $NexusURL + '/service/rest/v1/components?repository=' + $Repository
-
-$components = Get-RepoComponents -Credential $Credential -RepositoryUrl $RepositoryURL
+$components = Get-RepoGroupComponents -Credential $Credential -NexusURL $NexusURL -Repository $Repository -Group $RepositoryDirectory
 $packageName = Get-LastPackage -Components $components -Group $RepositoryDirectory
 
 if(!$packageName) 
